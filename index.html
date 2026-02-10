@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoreboard Futsal SMAN 1 Magetan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;700;900&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --futsal-green: #0F3D2E;
+            --dark-bg: #121212;
+            --accent-white: #FAFAFA;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--accent-white);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        .font-sport { font-family: 'Bebas Neue', cursive; }
+        .font-heading { font-family: 'Montserrat', sans-serif; }
+
+        .score-display {
+            font-size: 16rem;
+            line-height: 0.9;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+
+        .timer-display {
+            font-size: 9rem;
+            line-height: 1;
+            color: #FFD700;
+        }
+
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-control {
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .btn-control:active {
+            transform: scale(0.92);
+        }
+
+        .mode-display-only .operator-controls { display: none; }
+        
+        .stat-label {
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #999;
+        }
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-family: 'Bebas Neue';
+        }
+
+        @media (max-width: 1024px) {
+            .score-display { font-size: 10rem; }
+            .timer-display { font-size: 6rem; }
+            .stat-value { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body class="bg-[#121212]">
+
+    <div id="app" class="min-h-screen flex flex-col p-4 md:p-6 main-container">
+        
+        <header class="flex flex-col items-center mb-6">
+            <img src="https://smasa-magetan.sch.id/wp-content/uploads/2023/06/LOGO-SMA-NEGERI-1-MAGETAN-258x300.png" 
+                 alt="Logo SMASA" class="w-14 md:w-16 mb-2 drop-shadow-lg">
+            <h1 class="font-heading font-black text-lg md:text-3xl tracking-[0.2em] text-center uppercase">
+                Class Meeting Futsal <span class="text-green-500">SMAN 1 Magetan</span>
+            </h1>
+            <p class="text-[10px] tracking-[0.4em] text-gray-500 uppercase mt-1">Smasa Magetan • High School Championship</p>
+        </header>
+
+        <main class="flex-grow flex items-center justify-center">
+            <div class="grid grid-cols-3 w-full max-w-[1600px] items-center text-center">
+                
+                <div class="flex flex-col items-center">
+                    <input type="text" id="teamAName" value="XI IPA 1" 
+                           class="bg-transparent border-none text-center font-heading font-black text-4xl md:text-6xl uppercase w-full outline-none focus:text-green-400 mb-2"
+                           onchange="updateName('A', this.value)">
+                    
+                    <div id="scoreA" class="font-sport score-display my-4">0</div>
+
+                    <div class="flex flex-col gap-4 mt-2">
+                        <div class="flex items-center gap-8 justify-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-10 bg-yellow-500 rounded-md shadow-[0_0_15px_rgba(234,179,8,0.4)]"></div>
+                                <span id="yellowCardCountA" class="stat-value">0</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-10 bg-red-600 rounded-md shadow-[0_0_15px_rgba(220,38,38,0.4)]"></div>
+                                <span id="redCardCountA" class="stat-value">0</span>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 px-6 py-2 rounded-full border border-white/10">
+                            <span class="stat-label">Foul: </span>
+                            <span id="foulCountA" class="stat-value text-red-500 ml-2">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center px-4">
+                    <div id="timer" class="font-sport timer-display mb-2">10:00</div>
+                    <div id="periodDisplay" class="font-heading font-black text-xl md:text-3xl bg-green-600/20 border border-green-500/30 px-10 py-2 rounded-2xl text-green-400 tracking-widest uppercase">
+                        Babak 1
+                    </div>
+                    
+                    <div class="mt-8 operator-controls flex gap-3">
+                        <button onclick="toggleTimer()" id="btnStart" class="bg-green-600 hover:bg-green-500 text-white px-8 py-3 rounded-2xl font-bold btn-control shadow-xl">START</button>
+                        <button onclick="resetTimer()" class="bg-gray-700 hover:bg-gray-600 text-white px-8 py-3 rounded-2xl font-bold btn-control">RESET</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <input type="text" id="teamBName" value="XI IPS 2" 
+                           class="bg-transparent border-none text-center font-heading font-black text-4xl md:text-6xl uppercase w-full outline-none focus:text-green-400 mb-2"
+                           onchange="updateName('B', this.value)">
+                    
+                    <div id="scoreB" class="font-sport score-display my-4">0</div>
+
+                    <div class="flex flex-col gap-4 mt-2">
+                        <div class="flex items-center gap-8 justify-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-10 bg-yellow-500 rounded-md shadow-[0_0_15px_rgba(234,179,8,0.4)]"></div>
+                                <span id="yellowCardCountB" class="stat-value">0</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-10 bg-red-600 rounded-md shadow-[0_0_15px_rgba(220,38,38,0.4)]"></div>
+                                <span id="redCardCountB" class="stat-value">0</span>
+                            </div>
+                        </div>
+                        <div class="bg-white/5 px-6 py-2 rounded-full border border-white/10">
+                            <span class="stat-label">Foul: </span>
+                            <span id="foulCountB" class="stat-value text-red-500 ml-2">0</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <section class="operator-controls mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 glass-panel p-6 rounded-[2.5rem] border-t border-white/10 shadow-2xl">
+            
+            <div class="space-y-4 bg-white/5 p-4 rounded-3xl">
+                <h3 class="font-black text-green-500 uppercase text-xs tracking-widest text-center">Kontrol Tim Kiri</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="changeScore('A', 1)" class="bg-green-600 hover:bg-green-500 h-20 rounded-2xl font-black text-2xl btn-control">+ SKOR</button>
+                    <button onclick="changeScore('A', -1)" class="bg-red-900/40 hover:bg-red-900/60 h-20 rounded-2xl font-black text-2xl btn-control">- SKOR</button>
+                    <button onclick="addFoul('A', 1)" class="bg-gray-800 hover:bg-gray-700 py-4 rounded-xl font-bold btn-control">+ FOUL</button>
+                    <button onclick="addFoul('A', -1)" class="bg-gray-900 hover:bg-black py-4 rounded-xl font-bold btn-control text-xs">- FOUL</button>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="addCard('A', 'yellow')" class="flex-1 bg-yellow-500 text-black font-black py-3 rounded-xl btn-control text-xs uppercase">K. Kuning</button>
+                    <button onclick="addCard('A', 'red')" class="flex-1 bg-red-600 text-white font-black py-3 rounded-xl btn-control text-xs uppercase">K. Merah</button>
+                    <button onclick="resetCards('A')" class="bg-gray-800 p-3 rounded-xl btn-control text-[10px]">Reset Kartu</button>
+                </div>
+            </div>
+
+            <div class="space-y-4 flex flex-col justify-center py-2">
+                <div class="flex flex-col gap-3">
+                    <select id="periodSelect" onchange="updatePeriod(this.value)" class="bg-black text-white border border-white/10 p-4 rounded-2xl font-bold text-center">
+                        <option value="BABAK 1">BABAK 1</option>
+                        <option value="BABAK 2">BABAK 2</option>
+                        <option value="EXTRA TIME">EXTRA TIME</option>
+                        <option value="PENALTY">PENALTY</option>
+                    </select>
+                    <div class="flex gap-2">
+                        <input type="number" id="customMinutes" placeholder="Menit" class="w-full bg-black border border-white/10 p-4 rounded-2xl text-center font-bold">
+                        <button onclick="setCustomTime()" class="bg-blue-600 hover:bg-blue-500 px-6 rounded-2xl font-black btn-control">SET</button>
+                    </div>
+                    <button onclick="resetMatch()" class="bg-white text-black font-black py-4 rounded-2xl btn-control uppercase tracking-widest text-xs hover:bg-gray-200">Reset Total</button>
+                </div>
+            </div>
+
+            <div class="space-y-4 bg-white/5 p-4 rounded-3xl">
+                <h3 class="font-black text-green-500 uppercase text-xs tracking-widest text-center">Kontrol Tim Kanan</h3>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="changeScore('B', 1)" class="bg-green-600 hover:bg-green-500 h-20 rounded-2xl font-black text-2xl btn-control">+ SKOR</button>
+                    <button onclick="changeScore('B', -1)" class="bg-red-900/40 hover:bg-red-900/60 h-20 rounded-2xl font-black text-2xl btn-control">- SKOR</button>
+                    <button onclick="addFoul('B', 1)" class="bg-gray-800 hover:bg-gray-700 py-4 rounded-xl font-bold btn-control">+ FOUL</button>
+                    <button onclick="addFoul('B', -1)" class="bg-gray-900 hover:bg-black py-4 rounded-xl font-bold btn-control text-xs">- FOUL</button>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="addCard('B', 'yellow')" class="flex-1 bg-yellow-500 text-black font-black py-3 rounded-xl btn-control text-xs uppercase">K. Kuning</button>
+                    <button onclick="addCard('B', 'red')" class="flex-1 bg-red-600 text-white font-black py-3 rounded-xl btn-control text-xs uppercase">K. Merah</button>
+                    <button onclick="resetCards('B')" class="bg-gray-800 p-3 rounded-xl btn-control text-[10px]">Reset Kartu</button>
+                </div>
+            </div>
+
+        </section>
+
+        <footer class="mt-8 flex justify-between items-center opacity-40 hover:opacity-100 transition-opacity">
+            <button onclick="toggleDisplayMode()" class="bg-white/10 px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] border border-white/5">
+                Toggle Mode (Display / Full)
+            </button>
+            <p class="text-[10px] font-bold uppercase tracking-widest">Smasa Magetan Class Meeting © 2024</p>
+        </footer>
+    </div>
+
+    <audio id="buzzerSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+
+    <script>
+    /* ===============================
+       PENGATURAN GOOGLE SHEET
+    ================================ */
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNyOxRntOB3BX9nXxd7HDUcrKMYvtluhjxZPsOzZeWsjZS9TgcEM4UWoT8nVQ_TtJi/exec";
+
+    /* ===============================
+       STATE / DATA
+    ================================ */
+    let state = {
+        scoreA: 0, scoreB: 0,
+        foulsA: 0, foulsB: 0,
+        yellowA: 0, redA: 0,
+        yellowB: 0, redB: 0,
+        timerSeconds: 600,
+        timerRunning: false,
+        period: 'BABAK 1',
+        interval: null
+    };
+
+    let saveTimeout = null;
+
+    /* ===============================
+       FUNGSI UTAMA
+    ================================ */
+    function updateUI() {
+        document.getElementById('scoreA').innerText = state.scoreA;
+        document.getElementById('scoreB').innerText = state.scoreB;
+        document.getElementById('foulCountA').innerText = state.foulsA;
+        document.getElementById('foulCountB').innerText = state.foulsB;
+        document.getElementById('yellowCardCountA').innerText = state.yellowA;
+        document.getElementById('redCardCountA').innerText = state.redA;
+        document.getElementById('yellowCardCountB').innerText = state.yellowB;
+        document.getElementById('redCardCountB').innerText = state.redB;
+        
+        const mins = Math.floor(state.timerSeconds / 60);
+        const secs = state.timerSeconds % 60;
+        document.getElementById('timer').innerText = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+    }
+
+    function autoSave() {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => sendToSheet(), 1000);
+    }
+
+    function changeScore(team, val) {
+        if (team === 'A') state.scoreA = Math.max(0, state.scoreA + val);
+        else state.scoreB = Math.max(0, state.scoreB + val);
+        updateUI(); autoSave();
+    }
+
+    function addFoul(team, val) {
+        if (team === 'A') state.foulsA = Math.max(0, state.foulsA + val);
+        else state.foulsB = Math.max(0, state.foulsB + val);
+        updateUI(); autoSave();
+    }
+
+    function addCard(team, type) {
+        if (team === 'A') type === 'yellow' ? state.yellowA++ : state.redA++;
+        else type === 'yellow' ? state.yellowB++ : state.redB++;
+        updateUI(); autoSave();
+    }
+
+    function resetCards(team) {
+        if (team === 'A') { state.yellowA = 0; state.redA = 0; }
+        else { state.yellowB = 0; state.redB = 0; }
+        updateUI(); autoSave();
+    }
+
+    function updateName(team, val) { autoSave(); }
+
+    function updatePeriod(val) {
+        state.period = val;
+        document.getElementById('periodDisplay').innerText = val;
+        autoSave();
+    }
+
+    /* ===============================
+       TIMER LOGIC
+    ================================ */
+    function toggleTimer() {
+        const btn = document.getElementById('btnStart');
+        if (state.timerRunning) {
+            clearInterval(state.interval);
+            btn.innerText = 'START';
+            btn.classList.replace('bg-orange-600', 'bg-green-600');
+        } else {
+            state.interval = setInterval(() => {
+                if (state.timerSeconds > 0) {
+                    state.timerSeconds--;
+                    updateUI();
+                } else {
+                    clearInterval(state.interval);
+                    document.getElementById('buzzerSound').play();
+                    alert("Waktu Habis!");
+                }
+            }, 1000);
+            btn.innerText = 'PAUSE';
+            btn.classList.replace('bg-green-600', 'bg-orange-600');
+        }
+        state.timerRunning = !state.timerRunning;
+    }
+
+    function resetTimer() {
+        clearInterval(state.interval);
+        state.timerRunning = false;
+        state.timerSeconds = 600;
+        document.getElementById('btnStart').innerText = 'START';
+        updateUI();
+    }
+
+    function setCustomTime() {
+        const mins = document.getElementById('customMinutes').value;
+        if (mins > 0) {
+            state.timerSeconds = mins * 60;
+            updateUI();
+        }
+    }
+
+    function resetMatch() {
+        if(confirm("Reset seluruh skor dan statistik?")) {
+            state = { ...state, scoreA:0, scoreB:0, foulsA:0, foulsB:0, yellowA:0, redA:0, yellowB:0, redB:0 };
+            updateUI();
+            autoSave();
+        }
+    }
+
+    function toggleDisplayMode() {
+        document.body.classList.toggle('mode-display-only');
+    }
+
+    /* ===============================
+       KIRIM DATA
+    ================================ */
+    function sendToSheet() {
+        const data = {
+            waktu: new Date().toLocaleString("id-ID"),
+            timA: document.getElementById('teamAName').value,
+            timB: document.getElementById('teamBName').value,
+            skorA: state.scoreA,
+            skorB: state.scoreB,
+            foulA: state.foulsA,
+            foulB: state.foulsB,
+            yellowA: state.yellowA,
+            redA: state.redA,
+            yellowB: state.yellowB,
+            redB: state.redB,
+            babak: state.period
+        };
+
+        fetch(SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Penting agar tidak kena CORS error
+            body: JSON.stringify(data),
+            headers: { "Content-Type": "application/json" }
+        }).then(() => console.log("✔ Data terkirim ke Sheets"));
+    }
+
+    updateUI();
+    </script>
+</body>
+</html>
